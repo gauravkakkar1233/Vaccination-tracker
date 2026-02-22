@@ -2,14 +2,15 @@ import User from '../models/user.js';
 import bcrypt from "bcrypt"
 import dotenv from "dotenv"
 import jwt from "jsonwebtoken"
+import sendEmail from "../utils/mail.js"
 
 dotenv.config();
 
 const signup = async (req, res) => {
     try {
-        const { name, phone, password, role } = req.body;
+        const { name, phone, password, role, email } = req.body;
 
-        if (!name || !phone || !password) {
+        if (!name || !phone || !password || !email) {
             return res.status(400).json({ message: "All fields are required" });
         }
 
@@ -17,25 +18,35 @@ const signup = async (req, res) => {
             return res.status(400).json({ message: "Invalid role" });
         }
 
-        const user = await User.find({ phone });
-        if (user.length > 0) {
+        const user = await User.findOne({ phone });
+        if (user) {
             return res.status(400).json({ message: "User already exists" });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const newUser = await User.create({
-            name, 
-            phone, 
-            password: hashedPassword, 
-            role
+            name,
+            phone,
+            password: hashedPassword,
+            role,
+            email
         });
 
-        res.status(201).json({ 
-            message: "User created successfully",
-            user: newUser 
+        sendEmail({
+            to: newUser.email,
+            subject: "Welcome 🎉",
+            html: `
+              <h2>Welcome ${newUser.name}</h2>
+              <p>Your account was created successfully.</p>
+            `,
         });
-    } catch(err) {
+
+        res.status(201).json({
+            message: "User created successfully",
+            user: newUser
+        });
+    } catch (err) {
         res.status(500).json({ message: "An error occurred: " + err.message });
     }
 }
@@ -67,13 +78,13 @@ const login = async (req, res) => {
         res.cookie("token", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            maxAge: 3600000 
+            maxAge: 3600000
         });
-        
+
         res.status(200).json({ message: `Login successful ${user.name} , ${user.role}`, token });
-    } catch(err) {
+    } catch (err) {
         res.status(500).json({ message: "An error occurred: " + err.message });
     }
 }
 
-export {signup,login}
+export { signup, login }
