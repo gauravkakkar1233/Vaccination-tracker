@@ -1,6 +1,6 @@
 import express from 'express';
 import { authMiddleware, authorizeRole } from '../middlewares/authMiddleware.js';
-import { getAllUsers, registerChild, getPendingVaccinesForComingMonth, insertSpecialVaccine, setPendingStatus } from '../controller/adminController.js';
+import { getAllUsers, registerChild, getPendingVaccinesForComingMonth, insertSpecialVaccine, setPendingStatus    } from '../controller/adminController.js';
 
 const adminRouter = express.Router();
 

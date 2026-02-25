@@ -71,21 +71,10 @@ const getPendingVaccinesForComingMonth = async (req, res) => {
             return res.status(400).json({ message: "babyInfoId is required" });
         }
 
-        const now = new Date();
-        now.setHours(0, 0, 0, 0);
-
-        const nextMonth = new Date();
-        nextMonth.setDate(nextMonth.getDate() + 30);
-        nextMonth.setHours(23, 59, 59, 999);
-
         const pendingVaccines = await UserVaccine.find({
             babyInfo: babyInfoId,
             status: "Pending",
-            scheduledDate: {
-                $gte: now,
-                $lte: nextMonth
-            }
-        }).populate("vaccine").populate("babyInfo");
+        }).populate("vaccine").populate("babyInfo").sort({ scheduledDate: 1 });
 
         res.status(200).json({
             count: pendingVaccines.length,
@@ -150,21 +139,21 @@ const insertSpecialVaccine = async (req, res) => {
     }
 }
 
-const setPendingStatus = async (req,res) =>{
-    try{
-        const {userVaccineId} = req.body;
-        if(!userVaccineId){
-            return res.status(400).json({message:"userVaccineId is required"});
+const setPendingStatus = async (req, res) => {
+    try {
+        const { userVaccineId } = req.body;
+        if (!userVaccineId) {
+            return res.status(400).json({ message: "userVaccineId is required" });
         }
         const userVaccine = await UserVaccine.findById(userVaccineId);
-        if(!userVaccine){
-            return res.status(404).json({message:"User vaccine not found"});
+        if (!userVaccine) {
+            return res.status(404).json({ message: "User vaccine not found" });
         }
         userVaccine.status = "Completed";
         await userVaccine.save();
-        res.status(200).json({message:"User vaccine status set to completed successfully"});
-    }catch(error){
-        res.status(500).json({message:"Error setting user vaccine status to completed: " + error.message});
+        res.status(200).json({ message: "User vaccine status set to completed successfully" });
+    } catch (error) {
+        res.status(500).json({ message: "Error setting user vaccine status to completed: " + error.message });
     }
 }
 export { getAllUsers, registerChild, getPendingVaccinesForComingMonth, insertSpecialVaccine, setPendingStatus };
