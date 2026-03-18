@@ -20,9 +20,19 @@ userRouter.post(
     '/upload',
     authMiddleware,
     authorizeRole('user', 'admin'),
-    upload.single("document"),
+    (req, res, next) => {
+        upload.single("document")(req, res, (err) => {
+            if (err) {
+                console.error('[Upload] Multer/Cloudinary error:', err);
+                return res.status(500).json({ message: err.message });
+            }
+            next();
+        });
+    },
     async (req, res) => {
         try {
+            console.log('[Upload] req.file:', req.file);
+            console.log('[Upload] req.body:', req.body);
             const userId = req.user.id;
 
             const user = await User.findById(userId);
@@ -33,6 +43,7 @@ userRouter.post(
             const file = req.file;
 
             if (!file) {
+                console.error('[Upload] No file in req.file after multer');
                 return res.status(400).json({ message: "No file uploaded" });
             }
 
@@ -42,15 +53,18 @@ userRouter.post(
                 name: req.body.name || "Document"
             };
 
+            console.log('[Upload] Saving doc to DB:', newDoc);
             user.documents.push(newDoc);
             await user.save();
+            console.log('[Upload] Saved successfully');
 
             res.status(200).json({
                 message: "Document uploaded successfully",
-                document: newDoc
+                document: user.documents[user.documents.length - 1]
             });
 
         } catch (error) {
+            console.error('Upload error:', error);
             res.status(500).json({ message: error.message });
         }
     }
@@ -94,9 +108,11 @@ userRouter.delete(
                 return res.status(404).json({ message: "Document not found" });
             }
 
-            await cloudinary.uploader.destroy(doc.public_id);
+            if (doc.public_id) {
+                await cloudinary.uploader.destroy(doc.public_id);
+            }
 
-            doc.deleteOne();
+            user.documents.pull(req.params.docId);
             await user.save();
 
             res.status(200).json({

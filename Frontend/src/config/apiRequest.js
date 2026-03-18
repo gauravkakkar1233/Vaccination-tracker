@@ -70,3 +70,37 @@ export async function apiPostAuth(path, body, token) {
     }
     return { response, data };
 }
+
+export function apiUpload(path, formData, token) {
+    return new Promise((resolve) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `${API_URL}${path}`);
+        if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+        xhr.onload = () => {
+            let data;
+            try { data = JSON.parse(xhr.responseText); }
+            catch { data = { message: 'Invalid response from server' }; }
+            resolve({ response: { ok: xhr.status >= 200 && xhr.status < 300, status: xhr.status }, data });
+        };
+        xhr.onerror = () => {
+            resolve({ response: { ok: false, status: 0 }, data: { message: 'Network error' } });
+        };
+        xhr.send(formData);
+    });
+}
+
+export async function apiDelete(path, token) {
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    const response = await fetchWithTimeout(`${API_URL}${path}`, {
+        method: 'DELETE',
+        headers,
+    });
+    let data;
+    try {
+        data = await response.json();
+    } catch {
+        data = { message: 'Invalid response from server' };
+    }
+    return { response, data };
+}

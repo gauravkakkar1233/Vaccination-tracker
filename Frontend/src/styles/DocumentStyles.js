@@ -120,7 +120,7 @@ export const DocumentStyles = StyleSheet.create({
         borderTopLeftRadius: 24,
         borderTopRightRadius: 24,
         padding: 24,
-        minHeight: '60%',
+        paddingBottom: 40,
     },
     modalHeader: {
         flexDirection: 'row',
@@ -165,5 +165,44 @@ export const DocumentStyles = StyleSheet.create({
         color: '#ffffff',
         fontSize: 16,
         fontWeight: '600',
+    },
+    deleteButton: {
+        padding: 6,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    pickFileButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#fff7ed',
+        borderWidth: 1,
+        borderColor: '#fed7aa',
+        borderRadius: 12,
+        padding: 14,
+        marginBottom: 16,
+        gap: 10,
+    },
+    pickFileText: {
+        fontSize: 14,
+        color: '#e8703a',
+        fontWeight: '500',
+        flex: 1,
+    },
+    tapToView: {
+        fontSize: 12,
+        color: '#3b82f6',
+        marginTop: 4,
+        fontWeight: '500',
+    },
+    cardActions: {
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 10,
+        marginLeft: 8,
+    },
+    viewButton: {
+        padding: 6,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });
